@@ -1,106 +1,45 @@
 # Cowrie-Wazuh
-Cowrie and Wazuh oink oink
 
-<!--
-  COWRIE → WAZUH LOCAL RULESET (DOCUMENTATION COMMENT)
-  ====================================================
+Cowrie → Wazuh Local Ruleset Documentation
 
-  This section provides documentation for the custom Wazuh rules
-  used to detect activity inside a Cowrie SSH/Telnet honeypot.
-  It is intentionally commented out so it will NOT affect XML
-  parsing or Wazuh functionality.
+This document explains how the custom Wazuh rules in this repository are used to detect activity inside a Cowrie SSH/Telnet honeypot. The content originally existed as an XML comment, but it belongs here in the README where it is easier to read and maintain.
 
-  HOW COWRIE LOGS REACH THE WAZUH MANAGER
-  =======================================
+How Cowrie Logs Reach the Wazuh Manager
 
-  Cowrie generates JSON event logs here (on the Cowrie VM):
-      /opt/cowrie/var/log/cowrie/cowrie.json
+Cowrie generates its JSON event logs on the Cowrie honeypot VM. These logs are written to the file located at /opt/cowrie/var/log/cowrie/cowrie.json.
+The Wazuh agent installed on the Cowrie VM is configured to monitor this file and forward any new events to the Wazuh Manager.
+This configuration is added inside /var/ossec/etc/ossec.conf on the Cowrie VM.
+Once configured, the agent forwards Cowrie’s JSON log entries to the Wazuh Manager at 192.168.56.11.
+The Wazuh Manager then evaluates the incoming log data using the custom rules defined on the manager in /var/ossec/etc/rules/local_rules.xml.
 
-  The Wazuh agent on the Cowrie VM is configured to monitor
-  this file by adding the following to:
+What the Rules Detect
 
-      /var/ossec/etc/ossec.conf    [On the Cowrie honeypot VM 192.168.56.10]
+The rules are designed to identify attacker behavior inside the Cowrie honeypot.
+They react to new and closed SSH sessions, any commands typed inside Cowrie, and patterns that indicate potentially dangerous or malicious actions.
+Examples include the execution of destructive commands like rm -rf, attempts to change permissions or ownership, execution of uploaded binaries, and typical persistence techniques involving crontab.
+They also detect attempts to download files using tools like wget or curl, privilege escalation attempts using sudo or su, and the use of base64 encoding, which attackers often apply to disguise payloads.
+The rules also cover directory traversal attempts and package installation commands such as apt-get, yum, or dnf.
+In addition, modifications or attempts to access sensitive system files — such as /etc/passwd or /etc/shadow — are flagged as high-severity events.
 
-      <localfile>
-        <log_format>json</log_format>
-        <location>/opt/cowrie/var/log/cowrie/cowrie.json</location>
-      </localfile>
+Alert Levels
 
-  This causes the Wazuh agent to forward all Cowrie JSON events
-  to the Wazuh Manager (192.168.56.11), which then evaluates
-  them against the custom rules defined below in:
+The rules use three general alert levels to help categorize the severity of detected behavior.
+Level 6 is used for notable behavior that may be interesting to review.
+Level 8 indicates suspicious behavior that may reflect attacker reconnaissance or preparation.
+Level 10 and higher marks activity that is clearly malicious or represents a high-risk action.
 
-      /var/ossec/etc/rules/local_rules.xml
+How to Use the Rules
 
-  WHAT THESE RULES DETECT
-  =======================
+The rules themselves are placed inside the local_rules.xml file on the Wazuh Manager under /var/ossec/etc/rules/.
+After editing or replacing the file, the Wazuh Manager must be restarted for the changes to take effect.
+This is done using standard systemctl commands.
+Once the manager is restarted, you can test the rules by connecting to the Cowrie honeypot from an attacker workstation such as Kali Linux and running commands inside the honeypot session.
+When properly configured, these actions will appear as alerts inside the Wazuh dashboard under Security Events.
+Filtering by the rule group “cowrie”, by individual rule IDs, or by the specific Cowrie event IDs will help you verify that the rules are loading and triggering correctly.
 
-  • New SSH sessions to the honeypot
-  • Closed SSH sessions
-  • Any command entered in a Cowrie session
-        (eventid: cowrie.command.input)
+End of Documentation
 
-  • Dangerous / destructive commands:
-        - rm -rf
-        - chmod 777
-        - chown root:root
-        - ./binary execution
+The full XML ruleset can be found in the accompanying local_rules.xml file in this repository.
 
-  • Persistence attempts:
-        - crontab modifications
-
-  • File download attempts:
-        - wget
-        - curl
-
-  • Privilege escalation attempts:
-        - sudo
-        - su
-
-  • Encoding / decoding behavior:
-        - base64
-
-  • Directory traversal (../../..)
-
-  • Package installation:
-        - apt-get
-        - yum
-        - dnf
-
-  • Modification attempts on sensitive system files:
-        - /etc/passwd
-        - /etc/shadow
-
-  ALERT LEVELS
-  ============
-
-    Level 6   = interesting / notable behavior
-    Level 8   = suspicious activity
-    Level 10+ = high/critical malicious behavior
-
-  HOW TO USE THESE RULES
-  ======================
-
-  1. Add the rule definitions below this comment block.
-  2. Save the file:
-         /var/ossec/etc/rules/local_rules.xml
-  3. Restart the Wazuh Manager:
-         sudo systemctl restart wazuh-manager
-         sudo systemctl status wazuh-manager
-  4. Generate Cowrie activity from your attacker machine (Kali):
-         whoami, pwd, rm -rf /tmp/test, crontab -l,
-         wget http://example.com/x, base64 tests, etc.
-  5. View alerts in Wazuh → Security Events:
-         Use a DQL filter such as:
-
-           rule.group:"cowrie"
-           OR rule.id:910001 OR rule.id:910002 OR ...
-           OR data.eventid:"cowrie.command.input"
-
-  You should now see clear, descriptive alerts for all Cowrie
-  sessions, commands, and malicious behaviors.
-
-  END OF DOCUMENTATION — RULES BEGIN BELOW
-  =======================================
---> Rules can be found in /local_rules.xml and fetched with command: "sudo curl -L -o /var/ossec/etc/rules/local_rules.xml https://raw.githubusercontent.com/Greeznerd/Cowrie-Wazuh/main/local_rules.xml"
+Rules can be found in /local_rules.xml and fetched with command: "sudo curl -L -o /var/ossec/etc/rules/local_rules.xml https://raw.githubusercontent.com/Greeznerd/Cowrie-Wazuh/main/local_rules.xml"
 
