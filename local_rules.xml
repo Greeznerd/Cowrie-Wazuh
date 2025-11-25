@@ -20,7 +20,7 @@
   The Wazuh agent on the Cowrie VM is configured to monitor
   this file by adding the following to:
 
-      /var/ossec/etc/ossec.conf   [On the Wazuh manager 192.168.56.11]
+      /var/ossec/etc/ossec.conf   [On the Cowrie honeypot VM 192.168.56.10] - Cowrie VM → runs Wazuh agent -> Agent monitors cowrie.json -> Agent sends logs to the Wazuh Manager (192.168.56.11)
 
       <localfile>
         <log_format>json</log_format>
