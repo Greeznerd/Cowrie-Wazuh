@@ -1,0 +1,112 @@
+<group name="cowrie,honeypot,">
+
+  <!-- Base rule for all Cowrie JSON logs -->
+  <rule id="100100" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie</field>
+    <description>Cowrie: base event grouping</description>
+  </rule>
+
+  <!-- Login failed -->
+  <rule id="100110" level="3">
+    <if_sid>100100</if_sid>
+    <match>cowrie.login.failed</match>
+    <description>Cowrie: login failed</description>
+  </rule>
+
+  <!-- Login success -->
+  <rule id="100120" level="3">
+    <if_sid>100100</if_sid>
+    <match>cowrie.login.success</match>
+    <description>Cowrie: login success</description>
+  </rule>
+
+  <!-- Any command input -->
+  <rule id="100130" level="5">
+    <if_sid>100100</if_sid>
+    <match>cowrie.command.input</match>
+    <description>Cowrie: attacker entered a command</description>
+  </rule>
+
+  <!-- Dangerous rm -rf -->
+  <rule id="100140" level="10">
+    <if_sid>100130</if_sid>
+    <match>rm -rf</match>
+    <description>Cowrie: dangerous "rm -rf" attempted</description>
+  </rule>
+
+  <!-- Cron persistence -->
+  <rule id="100150" level="7">
+    <if_sid>100130</if_sid>
+    <match>crontab</match>
+    <description>Cowrie: possible cron persistence attempt</description>
+  </rule>
+
+  <!-- Permission changes -->
+  <rule id="100160" level="7">
+    <if_sid>100130</if_sid>
+    <match>chmod</match>
+    <description>Cowrie: permission change attempt (chmod)</description>
+  </rule>
+
+  <rule id="100170" level="7">
+    <if_sid>100130</if_sid>
+    <match>chown</match>
+    <description>Cowrie: ownership change attempt (chown)</description>
+  </rule>
+
+  <!-- wget / curl file download -->
+  <rule id="100180" level="8">
+    <if_sid>100130</if_sid>
+    <match>wget</match>
+    <description>Cowrie: file download attempt (wget)</description>
+  </rule>
+
+  <rule id="100190" level="8">
+    <if_sid>100130</if_sid>
+    <match>curl</match>
+    <description>Cowrie: file download attempt (curl)</description>
+  </rule>
+
+  <!-- Switch user -->
+  <rule id="100200" level="9">
+    <if_sid>100130</if_sid>
+    <match>sudo</match>
+    <description>Cowrie: privilege escalation attempt (sudo)</description>
+  </rule>
+
+  <rule id="100210" level="9">
+    <if_sid>100130</if_sid>
+    <match>su </match>
+    <description>Cowrie: switch user attempt (su)</description>
+  </rule>
+
+  <!-- Executing uploaded files -->
+  <rule id="100220" level="10">
+    <if_sid>100130</if_sid>
+    <regex>\.\/[a-zA-Z0-9_\-]+</regex>
+    <description>Cowrie: execution of possible malware (./binary)</description>
+  </rule>
+
+  <!-- base64 -->
+  <rule id="100230" level="6">
+    <if_sid>100130</if_sid>
+    <match>base64</match>
+    <description>Cowrie: base64 encoding/decoding command</description>
+  </rule>
+
+  <!-- Directory traversal -->
+  <rule id="100240" level="7">
+    <if_sid>100130</if_sid>
+    <regex>\.\.\/\.\.\/</regex>
+    <description>Cowrie: directory traversal attempt (../../)</description>
+  </rule>
+
+  <!-- Sensitive system files -->
+  <rule id="100250" level="12">
+    <if_sid>100130</if_sid>
+    <regex>\/etc\/passwd|\/etc\/shadow</regex>
+    <description>Cowrie: modification attempt on sensitive file</description>
+  </rule>
+
+</group>
