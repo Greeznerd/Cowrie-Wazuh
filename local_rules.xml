@@ -1,97 +1,97 @@
 
 <!-- Cowrie honeypot rules -->
-  <group name="cowrie,honeypot,">
+<group name="cowrie,honeypot,">
 
-    <!-- New / closed sessions -->
-    <rule id="910001" level="6">
-      <match>cowrie.session.connect</match>
-      <description>Cowrie: New SSH session to honeypot</description>
-    </rule>
+  <!-- New / closed sessions -->
+  <rule id="910001" level="6">
+    <match>cowrie.session.connect</match>
+    <description>Cowrie: New SSH session to honeypot</description>
+  </rule>
 
-    <rule id="910002" level="4">
-      <match>cowrie.session.closed</match>
-      <description>Cowrie: SSH session to honeypot closed</description>
-    </rule>
+  <rule id="910002" level="4">
+    <match>cowrie.session.closed</match>
+    <description>Cowrie: SSH session to honeypot closed</description>
+  </rule>
 
-    <!-- Any command typed in Cowrie -->
-    <rule id="910003" level="8">
-      <match>cowrie.command.input</match>
-      <description>Cowrie: Attacker entered a command</description>
-    </rule>
+  <!-- Any command typed in Cowrie -->
+  <rule id="910003" level="8">
+    <match>cowrie.command.input</match>
+    <description>Cowrie: Attacker entered a command</description>
+  </rule>
 
-    <!-- Very dangerous commands -->
-    <rule id="910004" level="10">
-      <match>rm -rf</match>
-      <description>Cowrie: Dangerous command "rm -rf" attempted</description>
-    </rule>
+  <!-- Very dangerous commands -->
+  <rule id="910004" level="10">
+    <match>rm -rf</match>
+    <description>Cowrie: Dangerous command "rm -rf" attempted</description>
+  </rule>
 
-    <!-- Persistence: cron / crontab -->
-    <rule id="910005" level="9">
-      <match>crontab</match>
-      <description>Cowrie: Possible cron persistence attempt</description>
-    </rule>
+  <!-- Persistence: cron / crontab -->
+  <rule id="910005" level="9">
+    <match>crontab</match>
+    <description>Cowrie: Possible cron persistence attempt</description>
+  </rule>
 
-    <!-- Permission & ownership changes -->
-    <rule id="910006" level="8">
-      <match>chmod</match>
-      <description>Cowrie: Permission change attempt (chmod)</description>
-    </rule>
+  <!-- Permission & ownership changes -->
+  <rule id="910006" level="8">
+    <match>chmod</match>
+    <description>Cowrie: Permission change attempt (chmod)</description>
+  </rule>
 
-    <rule id="910007" level="8">
-      <match>chown</match>
-      <description>Cowrie: Ownership change attempt (chown)</description>
-    </rule>
+  <rule id="910007" level="8">
+    <match>chown</match>
+    <description>Cowrie: Ownership change attempt (chown)</description>
+  </rule>
 
-    <!-- File downloads -->
-    <rule id="910008" level="10">
-      <match>wget</match>
-      <description>Cowrie: File download attempt (wget)</description>
-    </rule>
+  <!-- File downloads -->
+  <rule id="910008" level="10">
+    <match>wget</match>
+    <description>Cowrie: File download attempt (wget)</description>
+  </rule>
 
-    <rule id="910009" level="10">
-      <match>curl</match>
-      <description>Cowrie: File download attempt (curl)</description>
-    </rule>
+  <rule id="910009" level="10">
+    <match>curl</match>
+    <description>Cowrie: File download attempt (curl)</description>
+  </rule>
 
-    <!-- Privilege escalation -->
-    <rule id="910010" level="11">
-      <match>sudo</match>
-      <description>Cowrie: Privilege escalation attempt (sudo)</description>
-    </rule>
+  <!-- Privilege escalation -->
+  <rule id="910010" level="11">
+    <match>sudo</match>
+    <description>Cowrie: Privilege escalation attempt (sudo)</description>
+  </rule>
 
-    <rule id="910011" level="11">
-      <match>su </match>
-      <description>Cowrie: Attempt to switch user (su)</description>
-    </rule>
+  <rule id="910011" level="11">
+    <match>su </match>
+    <description>Cowrie: Attempt to switch user (su)</description>
+  </rule>
 
-    <!-- Execution of uploaded binaries: "./something" -->
-    <rule id="910012" level="11">
-      <regex>\.\/[a-zA-Z0-9_\-]+</regex>
-      <description>Cowrie: Execution of possible uploaded binary (./filename)</description>
-    </rule>
+  <!-- Execution of uploaded binaries: "./something" -->
+  <rule id="910012" level="11">
+    <regex>\.\/[a-zA-Z0-9_\-]+</regex>
+    <description>Cowrie: Execution of possible uploaded binary (./filename)</description>
+  </rule>
 
-    <!-- Base64 decoding (often used to hide payloads) -->
-    <rule id="910013" level="9">
-      <match>base64</match>
-      <description>Cowrie: Base64 encoding/decoding command observed</description>
-    </rule>
+  <!-- Base64 decoding (often used to hide payloads) -->
+  <rule id="910013" level="9">
+    <match>base64</match>
+    <description>Cowrie: Base64 encoding/decoding command observed</description>
+  </rule>
 
-    <!-- Directory traversal attempts -->
-    <rule id="910014" level="7">
-      <regex>\.\.\/\.\.\/</regex>
-      <description>Cowrie: Directory traversal attempt (../../)</description>
-    </rule>
+  <!-- Directory traversal attempts -->
+  <rule id="910014" level="7">
+    <regex>\.\.\/\.\.\/</regex>
+    <description>Cowrie: Directory traversal attempt (../../)</description>
+  </rule>
 
-    <!-- Package installation attempts -->
-    <rule id="910015" level="9">
-      <regex>apt-get|aptitude|apt |yum |dnf </regex>
-      <description>Cowrie: Package installation / tooling attempt</description>
-    </rule>
+  <!-- Package installation attempts -->
+  <rule id="910015" level="9">
+    <regex>apt-get|aptitude|apt |yum |dnf </regex>
+    <description>Cowrie: Package installation / tooling attempt</description>
+  </rule>
 
-    <!-- Modifications to sensitive system files -->
-    <rule id="910016" level="12">
-      <regex>\/etc\/passwd|\/etc\/shadow</regex>
-      <description>Cowrie: Modification attempt on sensitive system file (/etc/passwd or /etc/shadow)</description>
-    </rule>
+  <!-- Modifications to sensitive system files -->
+  <rule id="910016" level="12">
+    <regex>\/etc\/passwd|\/etc\/shadow</regex>
+    <description>Cowrie: Modification attempt on sensitive system file (/etc/passwd or /etc/shadow)</description>
+  </rule>
 
-  </group>
+</group>
