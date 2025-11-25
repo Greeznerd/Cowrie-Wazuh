@@ -1,9 +1,6 @@
 # Cowrie-Wazuh
 Cowrie and Wazuh oink oink
 
-
-<?xml version="1.0" encoding="UTF-8"?>
-
 <!--
   COWRIE → WAZUH LOCAL RULESET (DOCUMENTATION COMMENT)
   ====================================================
@@ -105,4 +102,5 @@ Cowrie and Wazuh oink oink
 
   END OF DOCUMENTATION — RULES BEGIN BELOW
   =======================================
--->
+--> Rules can be found in /local_rules.xml and fetched with command: "sudo curl -L -o /var/ossec/etc/rules/local_rules.xml https://raw.githubusercontent.com/Greeznerd/Cowrie-Wazuh/main/local_rules.xml"
+
