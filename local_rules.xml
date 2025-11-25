@@ -16,17 +16,18 @@
 
   Cowrie generates JSON event logs here (on the Cowrie VM):
       /opt/cowrie/var/log/cowrie/cowrie.json
-
+  
   The Wazuh agent on the Cowrie VM is configured to monitor
   this file by adding the following to:
 
-      /var/ossec/etc/ossec.conf
+      /var/ossec/etc/ossec.conf   [This filepath is on the system, not in the cowrie-venv]
 
       <localfile>
         <log_format>json</log_format>
         <location>/opt/cowrie/var/log/cowrie/cowrie.json</location>
       </localfile>
 
+  
   This causes the Wazuh agent to forward all Cowrie JSON events
   to the Wazuh Manager, which then evaluates them against the
   custom rules defined below in:
