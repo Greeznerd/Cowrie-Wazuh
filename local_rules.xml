@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ================================================================
+      Cowrie → Wazuh Local Ruleset (Documentation Comment)
+  ================================================================
+  
+  This section provides documentation for the custom Wazuh rules
+  used to detect activity inside a Cowrie SSH/Telnet honeypot.
+  It is intentionally commented out so it will NOT affect XML
+  parsing or Wazuh functionality.
+
+  ---------------------------------------------------------------
+  HOW COWRIE LOGS REACH THE WAZUH MANAGER
+  ---------------------------------------------------------------
+
+  Cowrie generates JSON event logs here (on the Cowrie VM):
+      /opt/cowrie/var/log/cowrie/cowrie.json
+
+  The Wazuh agent on the Cowrie VM is configured to monitor
+  this file by adding the following to:
+
+      /var/ossec/etc/ossec.conf
+
+      <localfile>
+        <log_format>json</log_format>
+        <location>/opt/cowrie/var/log/cowrie/cowrie.json</location>
+      </localfile>
+
+  This causes the Wazuh agent to forward all Cowrie JSON events
+  to the Wazuh Manager, which then evaluates them against the
+  custom rules defined below in:
+
+      /var/ossec/etc/rules/local_rules.xml
+
+  ---------------------------------------------------------------
+  WHAT THESE RULES DETECT
+  ---------------------------------------------------------------
+
+  • New SSH sessions to the honeypot
+  • Closed SSH sessions
+  • Any command entered in a Cowrie session
+        (eventid: cowrie.command.input)
+
+  • Dangerous / destructive commands:
+        - rm -rf
+        - chmod 777
+        - chown root:root
+        - ./binary execution
+
+  • Persistence attempts:
+        - crontab modifications
+
+  • File download attempts:
+        - wget
+        - curl
+
+  • Privilege escalation attempts:
+        - sudo
+        - su
+
+  • Encoding / decoding behavior:
+        - base64
+
+  • Directory traversal (../../..)
+
+  • Package installation:
+        - apt-get
+        - yum
+        - dnf
+
+  • Modification attempts on sensitive system files:
+        - /etc/passwd
+        - /etc/shadow
+
+  ---------------------------------------------------------------
+  ALERT LEVELS
+  ---------------------------------------------------------------
+
+    Level 6   = interesting / notable behavior  
+    Level 8   = suspicious activity  
+    Level 10+ = high/critical malicious behavior  
+
+  All levels can be tuned as needed for your lab or production.
+
+  ---------------------------------------------------------------
+  HOW TO USE THESE RULES
+  ---------------------------------------------------------------
+
+  1. Add the rule definitions below this comment block.
+  2. Save the file:
+         /var/ossec/etc/rules/local_rules.xml
+  3. Restart the Wazuh Manager:
+         sudo systemctl restart wazuh-manager
+         sudo systemctl status wazuh-manager
+  4. Generate Cowrie activity from your attacker machine (Kali):
+         whoami, pwd, rm -rf /tmp/test, crontab -l,
+         wget http://example.com/x, base64 tests, etc.
+  5. View alerts in Wazuh → Security Events:
+         Use a DQL filter such as:
+
+           rule.group:"cowrie"
+           OR rule.id:910001 OR rule.id:910002 OR ...
+           OR data.eventid:"cowrie.command.input"
+
+  You should now see clear, descriptive alerts for all Cowrie
+  sessions, commands, and malicious behaviors.
+
+  ---------------------------------------------------------------
+  END OF DOCUMENTATION — RULES BEGIN BELOW
+  ---------------------------------------------------------------
+-->
+
+<!-- Cowrie honeypot rules -->
+  <group name="cowrie,honeypot,">
+
+    <!-- New / closed sessions -->
+    <rule id="910001" level="6">
+      <match>cowrie.session.connect</match>
+      <description>Cowrie: New SSH session to honeypot</description>
+    </rule>
+
+    <rule id="910002" level="4">
+      <match>cowrie.session.closed</match>
+      <description>Cowrie: SSH session to honeypot closed</description>
+    </rule>
+
+    <!-- Any command typed in Cowrie -->
+    <rule id="910003" level="8">
+      <match>cowrie.command.input</match>
+      <description>Cowrie: Attacker entered a command</description>
+    </rule>
+
+    <!-- Very dangerous commands -->
+    <rule id="910004" level="10">
+      <match>rm -rf</match>
+      <description>Cowrie: Dangerous command "rm -rf" attempted</description>
+    </rule>
+
+    <!-- Persistence: cron / crontab -->
+    <rule id="910005" level="9">
+      <match>crontab</match>
+      <description>Cowrie: Possible cron persistence attempt</description>
+    </rule>
+
+    <!-- Permission & ownership changes -->
+    <rule id="910006" level="8">
+      <match>chmod</match>
+      <description>Cowrie: Permission change attempt (chmod)</description>
+    </rule>
+
+    <rule id="910007" level="8">
+      <match>chown</match>
+      <description>Cowrie: Ownership change attempt (chown)</description>
+    </rule>
+
+    <!-- File downloads -->
+    <rule id="910008" level="10">
+      <match>wget</match>
+      <description>Cowrie: File download attempt (wget)</description>
+    </rule>
+
+    <rule id="910009" level="10">
+      <match>curl</match>
+      <description>Cowrie: File download attempt (curl)</description>
+    </rule>
+
+    <!-- Privilege escalation -->
+    <rule id="910010" level="11">
+      <match>sudo</match>
+      <description>Cowrie: Privilege escalation attempt (sudo)</description>
+    </rule>
+
+    <rule id="910011" level="11">
+      <match>su </match>
+      <description>Cowrie: Attempt to switch user (su)</description>
+    </rule>
+
+    <!-- Execution of uploaded binaries: "./something" -->
+    <rule id="910012" level="11">
+      <regex>\.\/[a-zA-Z0-9_\-]+</regex>
+      <description>Cowrie: Execution of possible uploaded binary (./filename)</description>
+    </rule>
+
+    <!-- Base64 decoding (often used to hide payloads) -->
+    <rule id="910013" level="9">
+      <match>base64</match>
+      <description>Cowrie: Base64 encoding/decoding command observed</description>
+    </rule>
+
+    <!-- Directory traversal attempts -->
+    <rule id="910014" level="7">
+      <regex>\.\.\/\.\.\/</regex>
+      <description>Cowrie: Directory traversal attempt (../../)</description>
+    </rule>
+
+    <!-- Package installation attempts -->
+    <rule id="910015" level="9">
+      <regex>apt-get|aptitude|apt |yum |dnf </regex>
+      <description>Cowrie: Package installation / tooling attempt</description>
+    </rule>
+
+    <!-- Modifications to sensitive system files -->
+    <rule id="910016" level="12">
+      <regex>\/etc\/passwd|\/etc\/shadow</regex>
+      <description>Cowrie: Modification attempt on sensitive system file (/etc/passwd or /etc/shadow)</description>
+    </rule>
+
+  </group>
