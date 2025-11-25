@@ -1,42 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ================================================================
-      Cowrie → Wazuh Local Ruleset (Documentation Comment)
-  ================================================================
-  
+  COWRIE → WAZUH LOCAL RULESET (DOCUMENTATION COMMENT)
+  ====================================================
+
   This section provides documentation for the custom Wazuh rules
   used to detect activity inside a Cowrie SSH/Telnet honeypot.
   It is intentionally commented out so it will NOT affect XML
   parsing or Wazuh functionality.
 
-  ---------------------------------------------------------------
   HOW COWRIE LOGS REACH THE WAZUH MANAGER
-  ---------------------------------------------------------------
+  =======================================
 
   Cowrie generates JSON event logs here (on the Cowrie VM):
       /opt/cowrie/var/log/cowrie/cowrie.json
-  
+
   The Wazuh agent on the Cowrie VM is configured to monitor
   this file by adding the following to:
 
-      /var/ossec/etc/ossec.conf   [On the Cowrie honeypot VM 192.168.56.10] - Cowrie VM → runs Wazuh agent -> Agent monitors cowrie.json -> Agent sends logs to the Wazuh Manager (192.168.56.11)
+      /var/ossec/etc/ossec.conf    [On the Cowrie honeypot VM 192.168.56.10]
 
       <localfile>
         <log_format>json</log_format>
         <location>/opt/cowrie/var/log/cowrie/cowrie.json</location>
       </localfile>
 
-  
   This causes the Wazuh agent to forward all Cowrie JSON events
-  to the Wazuh Manager, which then evaluates them against the
-  custom rules defined below in:
+  to the Wazuh Manager (192.168.56.11), which then evaluates
+  them against the custom rules defined below in:
 
       /var/ossec/etc/rules/local_rules.xml
 
-  ---------------------------------------------------------------
   WHAT THESE RULES DETECT
-  ---------------------------------------------------------------
+  =======================
 
   • New SSH sessions to the honeypot
   • Closed SSH sessions
@@ -74,19 +70,15 @@
         - /etc/passwd
         - /etc/shadow
 
-  ---------------------------------------------------------------
   ALERT LEVELS
-  ---------------------------------------------------------------
+  ============
 
-    Level 6   = interesting / notable behavior  
-    Level 8   = suspicious activity  
-    Level 10+ = high/critical malicious behavior  
+    Level 6   = interesting / notable behavior
+    Level 8   = suspicious activity
+    Level 10+ = high/critical malicious behavior
 
-  All levels can be tuned as needed for your lab or production.
-
-  ---------------------------------------------------------------
   HOW TO USE THESE RULES
-  ---------------------------------------------------------------
+  ======================
 
   1. Add the rule definitions below this comment block.
   2. Save the file:
@@ -107,9 +99,8 @@
   You should now see clear, descriptive alerts for all Cowrie
   sessions, commands, and malicious behaviors.
 
-  ---------------------------------------------------------------
   END OF DOCUMENTATION — RULES BEGIN BELOW
-  ---------------------------------------------------------------
+  =======================================
 -->
 
 <!-- Cowrie honeypot rules -->
